@@ -17,4 +17,7 @@ public interface CallbackClientInterface
     public String notifyMe(String message) 
       throws java.rmi.RemoteException;
 
+    public String getClientId() throws RemoteException;
+
+
 } // end interface
