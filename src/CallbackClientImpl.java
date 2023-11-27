@@ -9,9 +9,16 @@ import java.rmi.server.*;
 
 public class CallbackClientImpl extends UnicastRemoteObject
      implements CallbackClientInterface {
-  
-   public CallbackClientImpl() throws RemoteException {
-      super( );
+
+   private String clientId;
+
+   public CallbackClientImpl(String clientId) throws RemoteException {
+      super();
+      this.clientId = clientId;
+   }
+
+   public String getClientId() {
+      return clientId;
    }
 
    public String notifyMe(String message){
