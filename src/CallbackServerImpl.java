@@ -41,22 +41,22 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     /**
      * Registra un cliente en el servidor si no existe previamente en el mapa de clientes.
      *
-     * @param Cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente a registrar.
+     * @param cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente a registrar.
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    public synchronized void registrarCliente(CallbackClientInterface Cliente) throws RemoteException {
+    public synchronized void registrarCliente(CallbackClientInterface cliente) throws RemoteException {
         // Comprobamos que Cliente no es null
-        if (Cliente == null || Cliente.getClientId() == null) {
+        if (cliente == null || cliente.getClientId() == null) {
             System.out.println("No ha sido posible registrar el cliente: null");
             return;
         }
 
         // Verifica si el cliente ya está registrado en el mapa de clientes por su ID único.
-        if (!clientes.containsKey(Cliente.getClientId())) {
+        if (!clientes.containsKey(cliente.getClientId())) {
             // Si el cliente no está registrado, lo agrega al mapa de clientes.
-            clientes.put(Cliente.getClientId(), Cliente);
-            crearGrupoAmistad(Cliente.getClientId());
-            System.out.println("Registrado nuevo cliente con ID: " + Cliente.getClientId());
+            clientes.put(cliente.getClientId(), cliente);
+            crearGrupoAmistad(cliente.getClientId());
+            System.out.println("Registrado nuevo cliente con ID: " + cliente.getClientId());
 
             // Realiza llamadas de retorno a todos los clientes registrados.
             hacerCallbacks();
@@ -67,20 +67,20 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     /**
      * Suprime un cliente registrado en el servidor.
      *
-     * @param Cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente a suprimir.
+     * @param cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente a suprimir.
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    public synchronized void suprimirCliente(CallbackClientInterface Cliente) throws RemoteException {
+    public synchronized void suprimirCliente(CallbackClientInterface cliente) throws RemoteException {
         // Comprueba que el objeto Cliente no sea nulo y que tenga un ID válido.
-        if (Cliente == null || Cliente.getClientId() == null) {
+        if (cliente == null || cliente.getClientId() == null) {
             System.out.println("No ha sido posible suprimir el cliente: null");
             return;
         }
 
         // Intenta eliminar al cliente del mapa de clientes por su ID.
-        if (clientes.remove(Cliente.getClientId()) != null) {
+        if (clientes.remove(cliente.getClientId()) != null) {
             // Si se encuentra y se elimina correctamente, muestra un mensaje de cliente suprimido.
-            System.out.println("Unregistered client with ID: " + Cliente.getClientId());
+            System.out.println("Unregistered client with ID: " + cliente.getClientId());
         } else {
             // Si no se encuentra en el mapa, muestra un mensaje de que el ID del cliente no se encontró.
             System.out.println("Unregister: Client ID not found.");
@@ -90,13 +90,13 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     /**
      * Obtiene y muestra la cantidad de clientes conectados en el servidor.
      *
-     * @param Cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente que solicita la cantidad de clientes conectados.
+     * @param cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente que solicita la cantidad de clientes conectados.
      *                En el futuro se necesitará para obtener su lista de amigos
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    public synchronized void getCantidadClientes(CallbackClientInterface Cliente) throws RemoteException {
+    public synchronized void getCantidadClientes(CallbackClientInterface cliente) throws RemoteException {
         // Comprueba que el objeto Cliente no sea nulo y que tenga un ID válido.
-        if (Cliente == null || Cliente.getClientId() == null) {
+        if (cliente == null || cliente.getClientId() == null) {
             System.out.println("No ha sido posible obtener la cantidad de clientes: Cliente nulo o ID nulo");
             return;
         }
@@ -115,12 +115,12 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     /**
      * Obtiene y muestra la lista de usuarios conectados en el servidor (las claves del mapa de clientes).
      *
-     * @param Cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente que solicita la lista de usuarios conectados.
+     * @param cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente que solicita la lista de usuarios conectados.
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    public synchronized void getListaUsuarios(CallbackClientInterface Cliente) throws RemoteException {
+    public synchronized void getListaUsuarios(CallbackClientInterface cliente) throws RemoteException {
         // Comprueba que el objeto Cliente no sea nulo y que tenga un ID válido.
-        if (Cliente == null || Cliente.getClientId() == null) {
+        if (cliente == null || cliente.getClientId() == null) {
             System.out.println("No ha sido posible obtener la lista de usuarios: Cliente nulo o ID nulo");
             return;
         }
@@ -148,7 +148,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
      * @param direccionObjeto La dirección de contacto que se enviará.
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    private synchronized void enviarContacto(CallbackClientInterface usuarioEnvia, String usuarioEnviar, String direccionObjeto) throws java.rmi.RemoteException {
+    public synchronized void enviarContacto(CallbackClientInterface usuarioEnvia, String usuarioEnviar, String direccionObjeto) throws java.rmi.RemoteException {
 
         System.out.println("------------ Enviando direccion ------------");
 
