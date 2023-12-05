@@ -5,11 +5,12 @@ import java.util.Set;
 /**
  * This is a remote interface for illustrating RMI
  * client callback.
+ *
  * @author Sócrates Agudo Torrado
  */
 
 public interface CallbackServerInterface extends Remote {
-
+    // metodo para obtener el objeto remoto de otro cliente
     String sayHello() throws RemoteException;
 
     void registrarCliente(CallbackClientInterface cliente) throws RemoteException;
