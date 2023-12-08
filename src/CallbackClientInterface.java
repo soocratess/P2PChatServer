@@ -1,5 +1,3 @@
-import java.rmi.*;
-
 /**
  * This is a remote interface for illustrating RMI
  * client callback.
@@ -9,14 +7,12 @@ import java.rmi.*;
 
 public interface CallbackClientInterface
         extends java.rmi.Remote {
-    // metodo para enviar o recibir mensajes
 
-    // metodo para recibir clientes conectados
-
-    public String notifyMe(String message)
+    public void amigoConectado(Usuario usuario)
             throws java.rmi.RemoteException;
 
-    public String getClientId() throws RemoteException;
+    public void amigoDesconectado(Usuario usuario)
+            throws java.rmi.RemoteException;
 
 
 } // end interface
