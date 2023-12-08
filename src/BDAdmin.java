@@ -9,8 +9,6 @@ public class BDAdmin {
     private static final String URL = "jdbc:sqlite:ChatDB.db";
     private Connection connection;
 
-// operaciones: iniciar sesion, registrarse, borrar usuario, buscar usuario, enviar peticion de amistad, aceptar peticion, borrar amigo
-
     public BDAdmin() {
         inicializarBaseDatos();
         conectar();
