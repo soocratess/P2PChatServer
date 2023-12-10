@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="chat.db" uuid="de95e9bb-313b-4d23-9a08-a7e451b82776">
+    <data-source source="LOCAL" name="ChatDB.db" uuid="9d2279a5-bb21-4b19-9ed7-42bc9a662a56">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/res/chat.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/res/ChatDB.db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
       </jdbc-additional-properties>

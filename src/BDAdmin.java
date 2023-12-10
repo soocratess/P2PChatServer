@@ -6,28 +6,11 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class BDAdmin {
-    private static final String URL = "jdbc:sqlite:ChatDB.db";
+    private static final String URL = "jdbc:sqlite:/Users/socrates/Library/Mobile Documents/com~apple~CloudDocs/ETSE/3º/CoDis/P5/P2PChatServer/res/ChatDB.db";
     private Connection connection;
 
     public BDAdmin() {
-        inicializarBaseDatos();
         conectar();
-    }
-
-    private void inicializarBaseDatos() {
-        try (Connection connection = DriverManager.getConnection(URL)) {
-            // Lee el script desde un archivo
-            String script = new String(Files.readAllBytes(Paths.get("src/resources/chat.db")), StandardCharsets.UTF_8);
-
-            // Ejecuta el script
-            try (Statement statement = connection.createStatement()) {
-                statement.execute(script);
-            }
-
-            System.out.println("Base de datos inicializada correctamente.");
-        } catch (SQLException | IOException e) {
-            System.out.println("Error al crear la base de datos: " + e.getMessage());
-        }
     }
 
     public void conectar() {

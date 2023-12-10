@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="dataSourceStorageLocal" created-in="IU-232.10203.10">
-    <data-source name="chat.db" uuid="de95e9bb-313b-4d23-9a08-a7e451b82776">
+  <component name="dataSourceStorageLocal" created-in="IU-233.11799.241">
+    <data-source name="ChatDB.db" uuid="9d2279a5-bb21-4b19-9ed7-42bc9a662a56">
       <database-info product="SQLite" version="3.43.0" jdbc-version="4.2" driver-name="SQLite JDBC" driver-version="3.43.0.0" dbms="SQLITE" exact-version="3.43.0" exact-driver-version="3.43">
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>
