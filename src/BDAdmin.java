@@ -143,6 +143,23 @@ public class BDAdmin {
         }
     }
 
+    public ArrayList<String> obtenerPeticiones(String usuario) {
+        String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 0 AND usuario_que_recibe = ?";
+        ArrayList<String> solicitudes = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, usuario);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    solicitudes.add(resultSet.getString("usuario_que_pide"));
+                }
+                return solicitudes;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al buscar usuario: " + e.getMessage());
+            return null;
+        }
+    }
+
     public boolean enviarPeticion(String origen, String destino) {
         String sql = "INSERT INTO AMISTAD (usuario_que_pide, usuario_que_recibe, pendiente) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
