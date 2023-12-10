@@ -10,24 +10,7 @@ public class BDAdmin {
     private Connection connection;
 
     public BDAdmin() {
-        //inicializarBaseDatos();
         conectar();
-    }
-
-    private void inicializarBaseDatos() {
-        try (Connection connection = DriverManager.getConnection(URL)) {
-            // Lee el script desde un archivo
-            String script = new String(Files.readAllBytes(Paths.get("ChatDB.db")), StandardCharsets.UTF_8);
-
-            // Ejecuta el script
-            try (Statement statement = connection.createStatement()) {
-                statement.execute(script);
-            }
-
-            System.out.println("Base de datos inicializada correctamente.");
-        } catch (SQLException | IOException e) {
-            System.out.println("Error al crear la base de datos: " + e.getMessage());
-        }
     }
 
     public void conectar() {
