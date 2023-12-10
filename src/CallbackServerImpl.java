@@ -41,7 +41,8 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
             for (String amigo : amigos) {
                 conectados.add(clientesConectados.get(amigo));
             }
-            usuario = new Usuario(cliente, username, url, amigos, conectados);
+            ArrayList<String> solicitudes = obtenerSolicitudes(username);
+            usuario = new Usuario(cliente, username, url, amigos, conectados, solicitudes);
 
             clientesConectados.put(username, usuario);
             clienteConectado(usuario);
@@ -64,7 +65,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         Usuario usuario = null;
         if (bd.registrarse(username, contrasena, "")) {
             String url = URL + username;
-            usuario = new Usuario(cliente, username, url, new ArrayList<>(), new ArrayList<>());
+            usuario = new Usuario(cliente, username, url);
             clientesConectados.put(username, usuario);
             // Realiza llamadas de retorno a todos los clientes registrados.
         }
@@ -72,14 +73,16 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     @Override
-    public void eliminarUsuario(Usuario usuario, String contrasena) throws RemoteException {
+    public boolean eliminarUsuario(Usuario usuario, String contrasena) throws RemoteException {
         if (usuario == null) {
             System.out.println("No ha sido posible registrar el cliente: null");
-            return;
+            return false;
         }
-        bd.borrarUsuario(usuario.getUsername(), contrasena);
-        clientesConectados.remove(usuario.getUsername());
-        clienteDesconectado(usuario);
+        if (bd.borrarUsuario(usuario.getUsername(), contrasena)) {
+            clientesConectados.remove(usuario.getUsername());
+            clienteDesconectado(usuario);
+            return true;
+        } else return false;
 
     }
 
@@ -94,37 +97,60 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     @Override
-    public void aceptarAmistad(Usuario usuario1, Usuario usuario2) throws RemoteException {
-        if (bd.aceptarPeticion(usuario1.getUsername(), usuario2.getUsername())) {
-            usuario1.anadirAmigo(usuario2);
-            usuario2.anadirAmigo(usuario1);
-            clienteConectado(usuario1);
-            clienteConectado(usuario2);
+    public Usuario aceptarAmistad(Usuario usuario1, String username2) throws RemoteException {
+        Usuario usuario2 = null;
+        if (bd.aceptarPeticion(username2, usuario1.getUsername())) {
+            usuario2 = clientesConectados.get(username2);
+            if (usuario2 != null) {
+                usuario1.anadirAmigo(usuario2);
+                usuario2.anadirAmigo(usuario1);
+                clienteConectado(usuario1);
+                clienteConectado(usuario2);
+            } else {
+                usuario1.anadirAmigo(username2);
+                usuario2 = new Usuario(username2, false);
+            }
         }
+        return usuario2;
     }
 
     @Override
-    public void pedirAmistad(String usuario1, String usuario2) {
+    public boolean pedirAmistad(String usuario1, String usuario2) {
         if (bd.enviarPeticion(usuario1, usuario2)) {
-
+            Usuario usuario = clientesConectados.get(usuario1);
+            if (usuario != null) {
+                usuario.anadirSolicitud(usuario2);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void rechazarAmistad(String usuario1, String usuario2) {
+    public boolean rechazarAmistad(String usuario1, String usuario2) {
         if (bd.rechazarAmistad(usuario1, usuario2)) {
-
+            Usuario usuario = clientesConectados.get(usuario1);
+            if (usuario != null) {
+                usuario.eliminarSolicitud(usuario2);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void eliminarAmigo(Usuario usuario1, Usuario usuario2) throws RemoteException {
-        if (bd.borrarAmigo(usuario1.getUsername(), usuario2.getUsername())) {
-            usuario1.eliminarAmigo(usuario2);
-            usuario2.eliminarAmigo(usuario1);
+    public boolean eliminarAmigo(Usuario usuario1, String username2) throws RemoteException {
+        if (bd.borrarAmigo(usuario1.getUsername(), username2)) {
+            usuario1.eliminarAmigo(username2);
             clienteDesconectado(usuario1);
-            clienteDesconectado(usuario2);
+            Usuario usuario2 = clientesConectados.get(username2);
+            if (usuario2 != null) {
+                usuario2.eliminarAmigo(usuario1.getUsername());
+                clienteDesconectado(usuario2);
+            }
+            return true;
         }
+        return false;
     }
 
     /**
@@ -136,6 +162,11 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     public ArrayList<String> obtenerAmistades(String usuario) {
         ArrayList<String> amigos = new ArrayList<>(bd.obtenerAmistades(usuario));
         return amigos;
+    }
+
+    public ArrayList<String> obtenerSolicitudes(String usuario) {
+        ArrayList<String> solicitudes = new ArrayList<>(bd.obtenerPeticiones(usuario));
+        return solicitudes;
     }
 
     @Override
