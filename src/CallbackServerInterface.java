@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public interface CallbackServerInterface extends Remote {
     public Usuario iniciarSesion(CallbackClientInterface cliente, String username, String contrasena) throws RemoteException;
 
-    public Usuario registrarUsuario(CallbackClientInterface cliente, String username, String contrasena);
+    public Usuario registrarUsuario(CallbackClientInterface cliente, String username, String contrasena) throws RemoteException;
 
     public boolean eliminarUsuario(Usuario usuario, String contrasena) throws RemoteException;
 
@@ -20,9 +20,9 @@ public interface CallbackServerInterface extends Remote {
 
     public Usuario aceptarAmistad(Usuario usuario1, String username2) throws RemoteException;
 
-    public boolean pedirAmistad(String usuario1, String usuario2);
+    public boolean pedirAmistad(String usuario1, String usuario2) throws RemoteException;
 
-    public boolean rechazarAmistad(String usuario1, String usuario2);
+    public boolean rechazarAmistad(String usuario1, String usuario2) throws RemoteException;
 
     public boolean eliminarAmigo(Usuario usuario1, String username2) throws RemoteException;
 
@@ -30,6 +30,6 @@ public interface CallbackServerInterface extends Remote {
 
     public ArrayList<String> obtenerSolicitudes(String usuario) throws RemoteException;
 
-    public String obtenerDireccion(String usuario);
+    public String obtenerDireccion(String usuario) throws RemoteException;
 
 }

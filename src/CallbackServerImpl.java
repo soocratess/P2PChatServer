@@ -56,7 +56,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
      * @param cliente Objeto que implementa la interfaz CallbackClientInterface y representa al cliente a registrar.
      * @throws RemoteException Si ocurre un error de comunicación remota.
      */
-    public Usuario registrarUsuario(CallbackClientInterface cliente, String username, String contrasena) {
+    public Usuario registrarUsuario(CallbackClientInterface cliente, String username, String contrasena) throws RemoteException{
         // Comprobamos que Cliente no es null
         if (cliente == null) {
             System.out.println("No ha sido posible registrar el cliente: null");
@@ -115,7 +115,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     @Override
-    public boolean pedirAmistad(String usuario1, String usuario2) {
+    public boolean pedirAmistad(String usuario1, String usuario2) throws RemoteException{
         if (bd.enviarPeticion(usuario1, usuario2)) {
             Usuario usuario = clientesConectados.get(usuario1);
             if (usuario != null) {
@@ -127,7 +127,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     @Override
-    public boolean rechazarAmistad(String usuario1, String usuario2) {
+    public boolean rechazarAmistad(String usuario1, String usuario2) throws RemoteException{
         if (bd.rechazarAmistad(usuario1, usuario2)) {
             Usuario usuario = clientesConectados.get(usuario1);
             if (usuario != null) {
@@ -159,18 +159,18 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
      * @param usuario El nombre del grupo de amistad del que se obtendrán los miembros.
      * @return Un conjunto de IDs de clientes que son miembros del grupo de amistad especificado.
      */
-    public ArrayList<String> obtenerAmistades(String usuario) {
+    public ArrayList<String> obtenerAmistades(String usuario) throws RemoteException{
         ArrayList<String> amigos = new ArrayList<>(bd.obtenerAmistades(usuario));
         return amigos;
     }
 
-    public ArrayList<String> obtenerSolicitudes(String usuario) {
+    public ArrayList<String> obtenerSolicitudes(String usuario) throws RemoteException{
         ArrayList<String> solicitudes = new ArrayList<>(bd.obtenerPeticiones(usuario));
         return solicitudes;
     }
 
     @Override
-    public String obtenerDireccion(String usuario) {
+    public String obtenerDireccion(String usuario) throws RemoteException{
         return null;
     }
 
