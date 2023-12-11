@@ -6,7 +6,6 @@ import java.rmi.registry.Registry;
 /**
  * Esta clase representa el servidor de objetos para un objeto distribuido
  * de la clase Callback, que implementa la interfaz remota CallbackInterface.
- *
  * @author M. L. Liu
  */
 

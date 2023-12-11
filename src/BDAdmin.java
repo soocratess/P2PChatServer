@@ -127,7 +127,7 @@ public class BDAdmin {
     }
 
     public ArrayList<String> obtenerPeticiones(String usuario) {
-        String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 0 AND usuario_que_recibe = ?";
+        String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 1 AND usuario_que_recibe = ?";
         ArrayList<String> solicitudes = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, usuario);
