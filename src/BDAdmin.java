@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class BDAdmin {
-    private static final String URL = "jdbc:sqlite:/Users/socrates/Library/Mobile Documents/com~apple~CloudDocs/ETSE/3º/CoDis/P5/P2PChatServer/res/ChatDB.db";
+    private static final String URL = "jdbc:sqlite:C:/Users/sergi/OneDrive/Documentos/Clase/CoDis/Practicas/P2PChatServer/res/chat.db";
     private Connection connection;
 
     public BDAdmin() {
