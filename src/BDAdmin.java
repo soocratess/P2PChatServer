@@ -1,18 +1,22 @@
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * Sócrates Agudo Torrado
+ * Sergio Álvarez Piñón
+ */
+
 public class BDAdmin {
+    // Ruta de la base de datos SQLite
     private static final String URL = "jdbc:sqlite:C:/Users/sergi/OneDrive/Documentos/Clase/CoDis/Practicas/P2PChatServer/res/chat.db";
     private Connection connection;
 
+    // Constructor de la clase, se llama automáticamente al instanciar un objeto
     public BDAdmin() {
-        conectar();
+        conectar(); // Llama al método conectar al crear una instancia de la clase
     }
 
+    // Método para establecer la conexión a la base de datos
     public void conectar() {
         try {
             // Establecer la conexión a la base de datos
@@ -23,9 +27,10 @@ public class BDAdmin {
         }
     }
 
+    // Método para cerrar la conexión a la base de datos
     public void desconectar() {
         try {
-            // Cerrar la conexión a la base de datos
+            // Cerrar la conexión a la base de datos si no está cerrada
             if (connection != null && !connection.isClosed()) {
                 connection.close();
                 System.out.println("Conexión cerrada.");
@@ -35,6 +40,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para iniciar sesión de usuario
     public boolean iniciarSesion(String username, String contrasena) {
         try {
             String sql = "SELECT * FROM USUARIO WHERE username = ? AND contrasena = ?";
@@ -42,6 +48,7 @@ public class BDAdmin {
                 statement.setString(1, username);
                 statement.setString(2, contrasena);
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    System.out.println("Consulta realizada sin errores");
                     return resultSet.next();
                 }
             }
@@ -51,6 +58,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para registrar un nuevo usuario
     public boolean registrarse(String username, String contrasena, String direccionObjetoRemoto) {
         try {
             String sql = "INSERT INTO USUARIO (username, contrasena, direccion_objeto_remoto) VALUES (?, ?, ?)";
@@ -59,6 +67,7 @@ public class BDAdmin {
                 statement.setString(2, contrasena);
                 statement.setString(3, direccionObjetoRemoto);
                 int rowsAffected = statement.executeUpdate();
+                System.out.println("Filas afectadas en INSERT " + rowsAffected);
                 return rowsAffected > 0;
             }
         } catch (SQLException e) {
@@ -67,6 +76,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para borrar un usuario
     public boolean borrarUsuario(String username, String contrasena) {
         try {
             // Preparar la declaración SQL para borrar el usuario con verificación de contraseña
@@ -79,6 +89,7 @@ public class BDAdmin {
                 // Ejecutar la consulta y obtener el número de filas afectadas
                 int filasAfectadas = statement.executeUpdate();
 
+                System.out.println("Filas afectadas en DELETE " + filasAfectadas);
                 // Devolver true si se eliminó al menos una fila, indicando éxito
                 return filasAfectadas > 0;
             }
@@ -88,12 +99,14 @@ public class BDAdmin {
         }
     }
 
+    // Método para buscar un usuario en la base de datos
     public boolean buscarUsuario(String username) {
         try {
             String sql = "SELECT * FROM USUARIO WHERE username = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, username);
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    System.out.println("Consulta realizada sin errores");
                     return resultSet.next();
                 }
             }
@@ -103,6 +116,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para obtener la lista de amigos de un usuario
     public ArrayList<String> obtenerAmistades(String usuario) {
         try {
             String sql = "SELECT * FROM AMISTAD WHERE pendiente = 0 AND (usuario_que_pide = ? OR usuario_que_recibe = ?)";
@@ -117,6 +131,7 @@ public class BDAdmin {
                             amigos.add(u1);
                         else amigos.add(u2);
                     }
+                    System.out.println("Consulta realizada sin errores");
                     return amigos;
                 }
             }
@@ -126,6 +141,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para obtener la lista de peticiones de amistad pendientes de un usuario
     public ArrayList<String> obtenerPeticiones(String usuario) {
         String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 0 AND usuario_que_recibe = ?";
         ArrayList<String> solicitudes = new ArrayList<>();
@@ -135,6 +151,7 @@ public class BDAdmin {
                 while (resultSet.next()) {
                     solicitudes.add(resultSet.getString("usuario_que_pide"));
                 }
+                System.out.println("Consulta realizada sin errores");
                 return solicitudes;
             }
         } catch (SQLException e) {
@@ -143,6 +160,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para enviar una petición de amistad
     public boolean enviarPeticion(String origen, String destino) {
         String sql = "INSERT INTO AMISTAD (usuario_que_pide, usuario_que_recibe, pendiente) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -150,6 +168,7 @@ public class BDAdmin {
             statement.setString(2, destino);
             statement.setInt(3, 1);
             int rowsAffected = statement.executeUpdate();
+            System.out.println("Filas afectadas en INSERT " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error al pedir amistad: " + e.getMessage());
@@ -157,12 +176,14 @@ public class BDAdmin {
         }
     }
 
+    // Método para aceptar una petición de amistad
     public boolean aceptarPeticion(String origen, String destino) {
         String sql = "UPDATE AMISTAD SET pendiente = 0 WHERE usuario_que_pide = ? AND usuario_que_recibe = ? AND pendiente = 1";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, origen);
             statement.setString(2, destino);
             int rowsAffected = statement.executeUpdate();
+            System.out.println("Filas afectadas en UPDATE " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error al aceptar amistad: " + e.getMessage());
@@ -170,6 +191,7 @@ public class BDAdmin {
         }
     }
 
+    // Método para eliminar a un amigo
     public boolean borrarAmigo(String origen, String destino) {
         String sql = "DELETE FROM AMISTAD WHERE ((usuario_que_pide = ? AND usuario_que_recibe = ?) OR (usuario_que_pide = ? AND usuario_que_recibe = ?)) AND pendiente=0";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -179,6 +201,7 @@ public class BDAdmin {
             statement.setString(4, origen);
 
             int rowsAffected = statement.executeUpdate();
+            System.out.println("Filas afectadas en DELETE " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error al eliminar amistad: " + e.getMessage());
@@ -186,12 +209,14 @@ public class BDAdmin {
         }
     }
 
+    // Método para rechazar una petición de amistad
     public boolean rechazarAmistad(String origen, String destino) {
         String sql = "DELETE FROM AMISTAD WHERE usuario_que_pide = ? AND usuario_que_recibe = ? AND pendiente = 1";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, origen);
             statement.setString(2, destino);
             int rowsAffected = statement.executeUpdate();
+            System.out.println("Filas afectadas en DELETE " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error al rechazar peticion de amistad: " + e.getMessage());
