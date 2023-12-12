@@ -4,18 +4,23 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 /**
- * Esta clase representa el servidor de objetos para un objeto distribuido
- * de la clase Callback, que implementa la interfaz remota CallbackInterface.
- * @author M. L. Liu
+ * Sócrates Agudo Torrado
+ * Sergio Álvarez Piñón
  */
 
+// Clase CallbackServer:
+// Esta clase representa el servidor que proporciona un servicio de callbacks
+// a través de RMI (Remote Method Invocation).
 public class CallbackServer {
+
+    // Puerto RMI utilizado por el servidor
     private static final int RMIPORT = 1099;
+
+    // URL del registro RMI
     private static final String REGISTRY_URL = "rmi://localhost:" + RMIPORT + "/callback";
 
     public static void main(String args[]) {
         try {
-
             // Inicia o recupera el registro RMI en el puerto especificado
             startRegistry(RMIPORT);
 
@@ -26,10 +31,10 @@ public class CallbackServer {
             Naming.rebind(REGISTRY_URL, exportedObj);
 
             System.out.println("Callback Server ready.");
-        }// end try
-        catch (Exception re) {
+        } catch (Exception re) {
+            // Manejo de excepciones en caso de cualquier error durante la ejecución
             System.out.println(re.getMessage());
-        } // end catch
+        }
     } // end main
 
     // Este método inicia un registro RMI en el localhost si no existe
@@ -46,3 +51,4 @@ public class CallbackServer {
         }
     } // end startRegistry
 } // end class
+

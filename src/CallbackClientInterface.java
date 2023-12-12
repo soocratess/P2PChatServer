@@ -1,18 +1,20 @@
+
 /**
- * This is a remote interface for illustrating RMI
- * client callback.
- *
- * @author M. L. Liu
+ * Sócrates Agudo Torrado
+ * Sergio Álvarez Piñón
  */
 
-public interface CallbackClientInterface
-        extends java.rmi.Remote {
+// Interfaz CallbackClientInterface:
+// Esta interfaz define los métodos que pueden ser invocados remotamente
+// por el servidor para notificar a los clientes sobre eventos relacionados
+// con la conexión de amigos.
 
-    public void amigoConectado(Usuario usuario)
-            throws java.rmi.RemoteException;
+public interface CallbackClientInterface extends java.rmi.Remote {
 
-    public void amigoDesconectado(Usuario usuario)
-            throws java.rmi.RemoteException;
+    // Método para notificar que un amigo se ha conectado
+    public void amigoConectado(Usuario usuario) throws java.rmi.RemoteException;
 
+    // Método para notificar que un amigo se ha desconectado
+    public void amigoDesconectado(Usuario usuario) throws java.rmi.RemoteException;
 
 } // end interface
