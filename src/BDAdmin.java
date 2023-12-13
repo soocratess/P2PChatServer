@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class BDAdmin {
     // Ruta de la base de datos SQLite
-    private static final String URL = "jdbc:sqlite:/Users/socrates/Library/Mobile Documents/com~apple~CloudDocs/ETSE/3º/CoDis/P5/P2PChatServer/res/chat.db";
+    private static final String URL = "jdbc:sqlite:C:/Users/sergi/OneDrive/Documentos/Clase/CoDis/Practicas/P2PChatServer/res/chat.db";
     private Connection connection;
 
     // Constructor de la clase, se llama automáticamente al instanciar un objeto
@@ -123,10 +123,14 @@ public class BDAdmin {
             ArrayList<String> amigos = new ArrayList<>();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, usuario);
+                statement.setString(2, usuario);
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next()) {
                         String u1 = resultSet.getString("usuario_que_pide");
                         String u2 = resultSet.getString("usuario_que_recibe");
+                        System.out.println("user q pide: " + u1);
+                        System.out.println("user q recibe: " + u2);
+                        System.out.println("User: " + usuario);
                         if (!u1.equalsIgnoreCase(usuario))
                             amigos.add(u1);
                         else amigos.add(u2);
