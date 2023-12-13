@@ -15,6 +15,7 @@ public class NotificadorAmigos extends Thread {
             if (conexion) {
                 clienteConectado(usuario);
             } else {
+                System.out.println(usuario.getUsername() + " se ha desconectado");
                 clienteDesconectado(usuario);
             }
         } catch (RemoteException e) {
@@ -27,6 +28,7 @@ public class NotificadorAmigos extends Thread {
         // Lógica de notificación a amigos cuando se conecta
         if (!usuario.getAmigosConectados().isEmpty())
             for (Usuario amigo : usuario.getAmigosConectados()) {
+                System.out.println("Vamos a avisar a " + amigo.getUsername());
                 amigo.getCliente().amigoConectado(usuario);
             }
     }
