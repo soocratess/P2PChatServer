@@ -2,10 +2,11 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 /**
  * Sócrates Agudo Torrado
  * Sergio Álvarez Piñón
- * */
+ */
 
 // Clase CallbackServerImpl:
 // Esta clase implementa la interfaz CallbackServerInterface y proporciona
@@ -41,19 +42,24 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         if (bd.iniciarSesion(username, contrasena)) {
             System.out.println("Inicio de sesión exitoso, user: " + username);
             ArrayList<String> amigos = obtenerAmistades(username);
+            System.out.println("Amigos: " + amigos);
             ArrayList<Usuario> conectados = new ArrayList<>();
 
             // Obtiene la lista de amigos conectados
             for (String amigo : amigos) {
-                conectados.add(clientesConectados.get(amigo));
+                System.out.println("Amigo: " + amigo);
+                Usuario amistad = clientesConectados.get(amigo);
+                if (amistad != null)
+                    conectados.add(amistad);
             }
 
             ArrayList<String> solicitudes = obtenerSolicitudes(username);
             usuario = new Usuario(cliente, username, amigos, conectados, solicitudes);
 
             clientesConectados.put(username, usuario);
-            clienteConectado(usuario);
+            notificarAmigos(usuario, true);
         }
+        System.out.println(usuario.getUsername());
         return usuario;
     }
 
@@ -90,7 +96,10 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         // Elimina al usuario de la base de datos
         if (bd.borrarUsuario(usuario.getUsername(), contrasena)) {
             clientesConectados.remove(usuario.getUsername());
-            clienteDesconectado(usuario);
+            notificarAmigos(usuario, false);
+            for (Usuario amigo : usuario.getAmigosConectados()) {
+                notificarAmigo(usuario, amigo, false);
+            }
             System.out.println("Borrado del usuario " + usuario.getUsername() + " exitoso");
             return true;
         } else {
@@ -111,7 +120,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         // Desconecta al usuario
         usuario.desconectar();
         clientesConectados.remove(usuario.getUsername());
-        clienteDesconectado(usuario);
+        notificarAmigos(usuario, false);
         System.out.println("Sesión cerrada exitosamente, user: " + usuario.getUsername());
     }
 
@@ -127,6 +136,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
             if (usuario2 != null) {
                 usuario1.anadirAmigo(usuario2);
                 usuario2.anadirAmigo(usuario1);
+                notificarAmigo(usuario1, usuario2, true);
             } else {
                 usuario1.anadirAmigo(username2);
                 usuario2 = new Usuario(username2, false);
@@ -138,6 +148,12 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     // Método para enviar una solicitud de amistad
     @Override
     public boolean pedirAmistad(String usuario1, String usuario2) throws RemoteException {
+        for (String amigo : obtenerSolicitudes(usuario1)) {
+            if (amigo.equals(usuario2)) {
+                System.out.println("Solicitud de amistad ya presente");
+                return false;
+            }
+        }
         if (bd.enviarPeticion(usuario1, usuario2)) {
             Usuario usuario = clientesConectados.get(usuario1);
             if (usuario != null) {
@@ -174,6 +190,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
             if (usuario2 != null) {
                 usuario2.eliminarAmigo(usuario1.getUsername());
+                notificarAmigo(usuario1, usuario2, true);
             }
             System.out.println("Amistad entre " + usuario1.getUsername() + " y " + username2 + " eliminada correctamente");
             return true;
@@ -186,16 +203,14 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     @Override
     public ArrayList<String> obtenerAmistades(String usuario) throws RemoteException {
         System.out.println("Obteniendo amigos de " + usuario);
-        ArrayList<String> amigos = new ArrayList<>(bd.obtenerAmistades(usuario));
-        return amigos;
+        return new ArrayList<>(bd.obtenerAmistades(usuario));
     }
 
     // Método para obtener la lista de solicitudes pendientes de un usuario
     @Override
     public ArrayList<String> obtenerSolicitudes(String usuario) throws RemoteException {
         System.out.println("Obteniendo solicitudes de amistad para " + usuario);
-        ArrayList<String> solicitudes = new ArrayList<>(bd.obtenerPeticiones(usuario));
-        return solicitudes;
+        return new ArrayList<>(bd.obtenerPeticiones(usuario));
     }
 
     // Método para obtener la dirección de un usuario (no implementado)
@@ -216,10 +231,21 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     // Método privado para notificar a los amigos de un usuario que se ha conectado
     private synchronized void clienteConectado(Usuario usuario) throws RemoteException {
         System.out.println("Se inician los callbacks a los clientes amigos de " + usuario.getUsername() + " porque se ha conectado");
+
         for (Usuario amigo : usuario.getAmigosConectados()) {
             amigo.getCliente().amigoDesconectado(usuario);
         }
         System.out.println("Callbacks a los clientes amigos de " + usuario.getUsername() + " terminados");
+    }
+
+    private void notificarAmigos(Usuario usuario, boolean conexion) {
+        NotificadorAmigos hiloNotificador = new NotificadorAmigos(usuario, conexion);
+        hiloNotificador.start();
+    }
+
+    private void notificarAmigo(Usuario usuario, Usuario amigo, boolean amistad) {
+        NotificadorAmigo hiloNotificador = new NotificadorAmigo(usuario, amigo, amistad);
+        hiloNotificador.start();
     }
 } // end CallbackServerImpl class
 
