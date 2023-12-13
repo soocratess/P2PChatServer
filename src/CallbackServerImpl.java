@@ -41,7 +41,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         // Verifica las credenciales en la base de datos
         if (bd.iniciarSesion(username, contrasena)) {
             System.out.println("Inicio de sesión exitoso, user: " + username);
-            ArrayList<String> amigos = obtenerAmistades(username);
+            ArrayList<String> amigos = obtenerAmistades(username, contrasena);
             System.out.println("Amigos: " + amigos);
             ArrayList<Usuario> conectados = new ArrayList<>();
 
@@ -53,13 +53,13 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
                     conectados.add(amistad);
             }
 
-            ArrayList<String> solicitudes = obtenerSolicitudes(username);
+            ArrayList<String> solicitudes = obtenerSolicitudes(username, contrasena);
             usuario = new Usuario(cliente, username, amigos, conectados, solicitudes);
 
             clientesConectados.put(username, usuario);
             notificarAmigos(usuario, true);
+
         }
-        System.out.println(usuario.getUsername());
         return usuario;
     }
 
@@ -95,8 +95,8 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
         // Elimina al usuario de la base de datos
         if (bd.borrarUsuario(usuario.getUsername(), contrasena)) {
-            clientesConectados.remove(usuario.getUsername());
             notificarAmigos(usuario, false);
+            clientesConectados.remove(usuario.getUsername());
             for (Usuario amigo : usuario.getAmigosConectados()) {
                 notificarAmigo(usuario, amigo, false);
             }
@@ -110,23 +110,31 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
     // Método para cerrar sesión de un usuario
     @Override
-    public void cerrarSesion(Usuario usuario) throws RemoteException {
-        // Verifica que el usuario no sea nulo
-        if (usuario == null) {
-            System.out.println("No ha sido posible registrar el cliente: null");
-            return;
+    public void cerrarSesion(Usuario usuario, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (bd.iniciarSesion(usuario.getUsername(), contrasena)) {
+            System.out.println("Se desconecta " + usuario.getUsername());
+            // Desconecta al usuario
+            for (Usuario amigos : usuario.getAmigosConectados()) {
+                System.out.println("Vamos a avisar a " + amigos.getUsername());
+            }
+            //notificarAmigos(usuario, false);
+            clienteDesconectado(usuario);
+            usuario.desconectar();
+            clientesConectados.remove(usuario.getUsername());
+            System.out.println("Sesión cerrada exitosamente, user: " + usuario.getUsername());
         }
-
-        // Desconecta al usuario
-        usuario.desconectar();
-        clientesConectados.remove(usuario.getUsername());
-        notificarAmigos(usuario, false);
-        System.out.println("Sesión cerrada exitosamente, user: " + usuario.getUsername());
     }
 
     // Método para aceptar una solicitud de amistad
     @Override
-    public Usuario aceptarAmistad(Usuario usuario1, String username2) throws RemoteException {
+    public Usuario aceptarAmistad(Usuario usuario1, String username2, String contrasena) throws RemoteException {
+
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario1.getUsername(), contrasena)) {
+            return null;
+        }
+
         Usuario usuario2 = null;
 
         // Acepta la petición de amistad en la base de datos
@@ -147,8 +155,13 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
     // Método para enviar una solicitud de amistad
     @Override
-    public boolean pedirAmistad(String usuario1, String usuario2) throws RemoteException {
-        for (String amigo : obtenerSolicitudes(usuario1)) {
+    public boolean pedirAmistad(String usuario1, String usuario2, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario1, contrasena)) {
+            return false;
+        }
+
+        for (String amigo : obtenerSolicitudes(usuario1, contrasena)) {
             if (amigo.equals(usuario2)) {
                 System.out.println("Solicitud de amistad ya presente");
                 return false;
@@ -168,7 +181,12 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
     // Método para rechazar una solicitud de amistad
     @Override
-    public boolean rechazarAmistad(String usuario1, String usuario2) throws RemoteException {
+    public boolean rechazarAmistad(String usuario1, String usuario2, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario1, contrasena)) {
+            return false;
+        }
+
         if (bd.rechazarAmistad(usuario1, usuario2)) {
             Usuario usuario = clientesConectados.get(usuario1);
             if (usuario != null) {
@@ -183,7 +201,12 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
     // Método para eliminar a un amigo
     @Override
-    public boolean eliminarAmigo(Usuario usuario1, String username2) throws RemoteException {
+    public boolean eliminarAmigo(Usuario usuario1, String username2, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario1.getUsername(), contrasena)) {
+            return false;
+        }
+
         if (bd.borrarAmigo(usuario1.getUsername(), username2)) {
             usuario1.eliminarAmigo(username2);
             Usuario usuario2 = clientesConectados.get(username2);
@@ -201,21 +224,30 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
     // Método para obtener la lista de amigos de un usuario
     @Override
-    public ArrayList<String> obtenerAmistades(String usuario) throws RemoteException {
+    public ArrayList<String> obtenerAmistades(String usuario, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario, contrasena)) {
+            return null;
+        }
         System.out.println("Obteniendo amigos de " + usuario);
         return new ArrayList<>(bd.obtenerAmistades(usuario));
     }
 
     // Método para obtener la lista de solicitudes pendientes de un usuario
     @Override
-    public ArrayList<String> obtenerSolicitudes(String usuario) throws RemoteException {
+    public ArrayList<String> obtenerSolicitudes(String usuario, String contrasena) throws RemoteException {
+        // Verifica que las credenciales son correctas
+        if (!bd.iniciarSesion(usuario, contrasena)) {
+            return null;
+        }
+
         System.out.println("Obteniendo solicitudes de amistad para " + usuario);
         return new ArrayList<>(bd.obtenerPeticiones(usuario));
     }
 
     // Método para obtener la dirección de un usuario (no implementado)
     @Override
-    public String obtenerDireccion(String usuario) throws RemoteException {
+    public String obtenerDireccion(String usuario, String contrasena) throws RemoteException {
         return null;
     }
 
@@ -223,7 +255,8 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     private synchronized void clienteDesconectado(Usuario usuario) throws RemoteException {
         System.out.println("Se inician los callbacks a los clientes amigos de " + usuario.getUsername() + " porque se ha desconectado");
         for (Usuario amigo : usuario.getAmigosConectados()) {
-            amigo.getCliente().amigoConectado(usuario);
+            System.out.println("Amigo de andrea " + amigo.getUsername());
+            amigo.getCliente().amigoDesconectado(usuario);
         }
         System.out.println("Callbacks a los clientes amigos de " + usuario.getUsername() + " terminados");
     }
@@ -239,6 +272,7 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     private void notificarAmigos(Usuario usuario, boolean conexion) {
+        System.out.println("Creamos el hilo notificador para avisar a los amigos de " + usuario.getUsername());
         NotificadorAmigos hiloNotificador = new NotificadorAmigos(usuario, conexion);
         hiloNotificador.start();
     }
