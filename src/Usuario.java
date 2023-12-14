@@ -144,7 +144,8 @@ public class Usuario implements Serializable {
 
     public void anadirAmigo(Usuario usuario) {
         amigos.add(usuario.getUsername());
-        if (usuario.isConectado()) amigosConectados.add(usuario);
+        if (usuario.isConectado())
+            amigosConectados.add(usuario);
     }
 
     public void anadirAmigo(String username) {
