@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class BDAdmin {
     // Ruta de la base de datos SQLite
-    private static final String URL = "jdbc:sqlite:C:/Users/sergi/OneDrive/Documentos/Clase/CoDis/Practicas/P2PChatServer/res/chat.db";
+    private static final String URL = "jdbc:sqlite:/Users/socrates/Library/Mobile Documents/com~apple~CloudDocs/ETSE/3º/CoDis/P5/P2PChatServer/res/chat.db";
     private Connection connection;
 
     // Constructor de la clase, se llama automáticamente al instanciar un objeto
@@ -147,8 +147,7 @@ public class BDAdmin {
 
     // Método para obtener la lista de peticiones de amistad pendientes de un usuario
     public ArrayList<String> obtenerPeticiones(String usuario) {
-        String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 1 AND usuario_que_recibe = ?";
-        ArrayList<String> solicitudes = new ArrayList<>();
+        String sql = "SELECT usuario_que_pide FROM AMISTAD WHERE pendiente = 1 AND usuario_que_recibe = ?";        ArrayList<String> solicitudes = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, usuario);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -224,6 +223,23 @@ public class BDAdmin {
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error al rechazar peticion de amistad: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Método para cambiar la contraseña del usuario
+    public boolean cambiarClaveAcceso(String username, String oldPasswd, String newPasswd) {
+        // UPDATE AMISTAD SET pendiente = 0 WHERE usuario_que_pide = ? AND usuario_que_recibe = ? AND pendiente = 1
+        String sql = "UPDATE USUARIO SET contrasena = ? WHERE username = ? AND contrasena = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, newPasswd);
+            statement.setString(2, username);
+            statement.setString(3, oldPasswd);
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Filas afectadas en UPDATE " + rowsAffected);
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al cambiar la contraseña de " + username + ": " + e.getMessage());
             return false;
         }
     }

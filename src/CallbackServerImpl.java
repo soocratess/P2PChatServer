@@ -223,7 +223,6 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
     }
 
     // Método para obtener la lista de amigos de un usuario
-    @Override
     public ArrayList<String> obtenerAmistades(String usuario, String contrasena) throws RemoteException {
         // Verifica que las credenciales son correctas
         if (!bd.iniciarSesion(usuario, contrasena)) {
@@ -243,12 +242,6 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
 
         System.out.println("Obteniendo solicitudes de amistad para " + usuario);
         return new ArrayList<>(bd.obtenerPeticiones(usuario));
-    }
-
-    // Método para obtener la dirección de un usuario (no implementado)
-    @Override
-    public String obtenerDireccion(String usuario, String contrasena) throws RemoteException {
-        return null;
     }
 
     // Método privado para notificar a los amigos de un usuario que se ha desconectado
@@ -281,5 +274,26 @@ public class CallbackServerImpl extends UnicastRemoteObject implements CallbackS
         NotificadorAmigo hiloNotificador = new NotificadorAmigo(usuario, amigo, amistad);
         hiloNotificador.start();
     }
+
+    // Método para cambiar la contraseña de un usuario
+    @Override
+    public boolean cambiarContrasena(Usuario user, String contrasenaActualHash, String nuevaContrasenaHash) throws RemoteException {
+        // Verifica que el usuario no sea nulo y que las credenciales coincidan
+        if (user == null || !bd.iniciarSesion(user.getUsername(), contrasenaActualHash)) {
+            System.out.println("Error de autenticación al cambiar contraseña para " + user.getUsername());
+            return false;
+        }
+
+        // Intenta cambiar la contraseña en la base de datos
+        boolean cambioExitoso = bd.cambiarClaveAcceso(user.getUsername(), contrasenaActualHash, nuevaContrasenaHash);
+        if (cambioExitoso) {
+            System.out.println("Contraseña cambiada exitosamente para " + user.getUsername());
+        } else {
+            System.out.println("Error al cambiar la contraseña para " + user.getUsername());
+        }
+
+        return cambioExitoso;
+    }
+
 } // end CallbackServerImpl class
 
