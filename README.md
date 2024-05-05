@@ -31,21 +31,15 @@ Es necesario tener instalado Java y configurado el entorno para usar RMI.
 `git clone https://github.com/soocratess/P2PChatServer.git`
 
 
-1. Compilar los archivos `.java`:
+2. Compilar los archivos `.java`
 
-`javac Server.java Client.java`
-
-
-1. Ejecutar el servidor:
-
-`java Server`
+3. Ejecutar el servidor
 
 
 ### Conexión de clientes
 
-Para conectar un cliente al servidor, ejecutar:
-
-`java Client`
+Conectar un cliente al servidor, puedes descargar mi versión del siguiente modo:
+`git clone https://github.com/soocratess/P2PChatApp`
 
 
 ## Contribuir
